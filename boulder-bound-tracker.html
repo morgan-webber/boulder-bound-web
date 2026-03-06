@@ -103,6 +103,13 @@
     gap: 20px;
   }
 
+  #sync-status {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
   .progress-global {
     display: flex;
     align-items: center;
@@ -661,6 +668,7 @@
     <div class="topbar-tag">DEV TRACKER v1.0</div>
   </div>
   <div class="topbar-right">
+    <span id="sync-status">● connecting…</span>
     <div class="progress-global">
       <span>OVERALL</span>
       <div class="progress-bar-wrap">
@@ -1292,113 +1300,145 @@
   </main>
 </div>
 
-<script>
-  // ── STATE ──
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp }         from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  // ─────────────────────────────────────────────
+  // 🔧 PASTE YOUR FIREBASE CONFIG HERE
+  // Project Settings → Your Apps → SDK snippet
+  // ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyABRV8xFZx5v-Ex6ybcByVxmeAeAfignsQ",
+    authDomain: "boulder-bound-bash.firebaseapp.com",
+    databaseURL: "https://boulder-bound-bash-default-rtdb.firebaseio.com",
+    projectId: "boulder-bound-bash",
+    storageBucket: "boulder-bound-bash.firebasestorage.app",
+    messagingSenderId: "85986121153",
+    appId: "1:85986121153:web:e0d298b45f09cef8d68b40",
+    measurementId: "G-7SLQ5T0021"
+  };
+  // ─────────────────────────────────────────────
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
   const devs = ['lead', 'env', 'player', 'ui'];
-  const state = { lead: {}, env: {}, player: {}, ui: {} };
 
-  // Load from localStorage
-  function loadState() {
-    devs.forEach(dev => {
-      const saved = localStorage.getItem('bb_' + dev);
-      if (saved) state[dev] = JSON.parse(saved);
-    });
+  // ── SYNC STATUS INDICATOR ──
+  function setStatus(msg, color) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = color;
   }
 
-  function saveState(dev) {
-    localStorage.setItem('bb_' + dev, JSON.stringify(state[dev]));
-  }
-
-  // ── TASK TOGGLE ──
-  function toggleTask(el) {
+  // ── BUILD STABLE TASK KEY ──
+  // Key = dev_sectionIndex so it's position-stable across browsers
+  function taskKey(el) {
     const dev = el.dataset.dev;
-    const tasks = el.closest('.day-task-list').querySelectorAll('.task-item[data-dev]');
-    const idx = Array.from(tasks).indexOf(el) + '_' + dev + '_' + el.closest('.day-block').dataset.day;
-    const key = el.dataset.dev + '_' + Array.from(el.closest('.dev-section').querySelectorAll('.task-item[data-dev]')).indexOf(el);
+    const allInSection = Array.from(
+      el.closest('.dev-section').querySelectorAll('.task-item[data-dev]')
+    );
+    return dev + '_' + allInSection.indexOf(el);
+  }
 
-    el.classList.toggle('done');
-    state[dev][key] = el.classList.contains('done');
-    saveState(dev);
+  // ── WRITE A SINGLE TASK TO FIREBASE ──
+  function writeTask(key, done) {
+    const [dev] = key.split('_');
+    set(ref(db, `boulder-bound/tasks/${dev}/${key}`), done)
+      .then(() => setStatus('● synced', 'var(--env)'))
+      .catch(() => setStatus('● sync error', '#f87171'));
+    setStatus('● saving…', 'var(--lead)');
+  }
+
+  // ── APPLY STATE TO DOM (without re-triggering writes) ──
+  function applyState(dev, data) {
+    const tasks = document.querySelectorAll(`.task-item[data-dev="${dev}"]`);
+    tasks.forEach((el, i) => {
+      const key = dev + '_' + i;
+      const shouldBeDone = !!(data && data[key]);
+      if (shouldBeDone) el.classList.add('done');
+      else el.classList.remove('done');
+    });
     updateProgress();
     updateTaskCounts();
   }
 
-  // ── PROGRESS ──
-  function updateProgress() {
-    let totalAll = 0, doneAll = 0;
-
-    devs.forEach(dev => {
-      const all = document.querySelectorAll(`.task-item[data-dev="${dev}"]`);
-      const done = document.querySelectorAll(`.task-item[data-dev="${dev}"].done`);
-      const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
-
-      document.getElementById('bar-' + dev).style.width = pct + '%';
-      document.getElementById('pct-' + dev).textContent = pct + '%';
-      document.getElementById('mini-' + dev).style.width = pct + '%';
-      document.getElementById('mini-' + dev + '-pct').textContent = pct + '%';
-      document.getElementById('nav-' + dev + '-pct').textContent = pct + '%';
-
-      totalAll += all.length;
-      doneAll += done.length;
+  // ── SUBSCRIBE TO FIREBASE FOR EACH DEV ──
+  // This fires immediately on load (replaces restoreState) and on every remote change
+  devs.forEach(dev => {
+    onValue(ref(db, `boulder-bound/tasks/${dev}`), snapshot => {
+      applyState(dev, snapshot.val());
     });
+  });
 
+  setStatus('● connecting…', 'var(--lead)');
+
+  // ── TASK TOGGLE ──
+  // Expose globally so onclick= attributes can call it
+  window.toggleTask = function(el) {
+    el.classList.toggle('done');
+    const key = taskKey(el);
+    writeTask(key, el.classList.contains('done'));
+    updateProgress();
+    updateTaskCounts();
+  };
+
+  // ── PROGRESS ──
+  window.updateProgress = function() {
+    let totalAll = 0, doneAll = 0;
+    devs.forEach(dev => {
+      const all  = document.querySelectorAll(`.task-item[data-dev="${dev}"]`);
+      const done = document.querySelectorAll(`.task-item[data-dev="${dev}"].done`);
+      const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
+      document.getElementById('bar-'  + dev).style.width  = pct + '%';
+      document.getElementById('pct-'  + dev).textContent  = pct + '%';
+      document.getElementById('mini-' + dev).style.width  = pct + '%';
+      document.getElementById('mini-' + dev + '-pct').textContent = pct + '%';
+      document.getElementById('nav-'  + dev + '-pct').textContent = pct + '%';
+      totalAll += all.length;
+      doneAll  += done.length;
+    });
     const globalPct = totalAll ? Math.round((doneAll / totalAll) * 100) : 0;
-    document.getElementById('global-bar').style.width = globalPct + '%';
-    document.getElementById('global-pct').textContent = globalPct + '%';
-  }
+    document.getElementById('global-bar').style.width  = globalPct + '%';
+    document.getElementById('global-pct').textContent  = globalPct + '%';
+  };
 
-  function updateTaskCounts() {
+  window.updateTaskCounts = function() {
     document.querySelectorAll('.day-block').forEach(block => {
       const countEl = block.querySelector('.day-task-count');
       if (!countEl) return;
-      const all = block.querySelectorAll('.task-item[data-dev]').length;
+      const all  = block.querySelectorAll('.task-item[data-dev]').length;
       const done = block.querySelectorAll('.task-item[data-dev].done').length;
       countEl.textContent = done + '/' + all;
     });
-  }
+  };
 
   // ── DAY COLLAPSE ──
-  function toggleDay(header) {
+  window.toggleDay = function(header) {
     header.closest('.day-block').classList.toggle('collapsed');
-  }
+  };
 
   // ── DAY FILTER ──
-  function filterDay(day) {
+  window.filterDay = function(day) {
     document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
-
     document.querySelectorAll('.day-block').forEach(block => {
-      if (day === 'all' || block.dataset.day === day) {
+      if (day === 'all' || block.dataset.day === day)
         block.classList.remove('day-hidden');
-      } else {
+      else
         block.classList.add('day-hidden');
-      }
     });
-  }
+  };
 
   // ── SCROLL TO DEV ──
-  function scrollToDev(dev) {
+  window.scrollToDev = function(dev) {
     document.querySelectorAll('.dev-nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-' + dev).classList.add('active');
     document.getElementById('dev-' + dev).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  // ── RESTORE STATE ──
-  function restoreState() {
-    devs.forEach(dev => {
-      const tasks = document.querySelectorAll(`.task-item[data-dev="${dev}"]`);
-      tasks.forEach((el, i) => {
-        const key = dev + '_' + i;
-        if (state[dev][key]) el.classList.add('done');
-      });
-    });
-  }
-
-  // ── INIT ──
-  loadState();
-  restoreState();
-  updateProgress();
-  updateTaskCounts();
+  };
 </script>
 </body>
 </html>
