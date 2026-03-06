@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boulder Bound — Team Pitch</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --stone: #2a2520;
+    --stone-mid: #3d3730;
+    --stone-light: #5c5248;
+    --dirt: #8b6f47;
+    --moss: #5a7a3a;
+    --moss-bright: #7ab648;
+    --amber: #e8a030;
+    --cream: #f0e8d8;
+    --white: #faf7f2;
+    --danger: #c94a2a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--stone);
+    color: var(--cream);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 70%, rgba(90,122,58,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(139,111,71,0.12) 0%, transparent 60%),
+      linear-gradient(180deg, #1a1710 0%, var(--stone) 40%, #221e18 100%);
+  }
+
+  /* Animated ground cracks */
+  .crack {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(0deg, #161310 0%, transparent 100%);
+  }
+
+  /* Boulder decoration */
+  .boulder-deco {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #6b5e50, #2e2720 60%, #1a1410);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.6), inset 4px 4px 12px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.5);
+    animation: boulderFloat 6s ease-in-out infinite;
+  }
+  .boulder-deco.b1 { width: 320px; height: 320px; right: -60px; top: 10%; opacity: 0.5; animation-delay: 0s; }
+  .boulder-deco.b2 { width: 120px; height: 120px; left: 5%; bottom: 20%; opacity: 0.3; animation-delay: -2s; }
+  .boulder-deco.b3 { width: 60px; height: 60px; left: 20%; top: 15%; opacity: 0.2; animation-delay: -4s; }
+
+  @keyframes boulderFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(3deg); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 860px;
+  }
+
+  .game-jam-badge {
+    display: inline-block;
+    background: rgba(232,160,48,0.15);
+    border: 1px solid rgba(232,160,48,0.4);
+    color: var(--amber);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: clamp(5rem, 14vw, 11rem);
+    line-height: 0.9;
+    color: var(--white);
+    text-shadow: 0 4px 0 rgba(0,0,0,0.4), 0 0 60px rgba(232,160,48,0.15);
+    animation: fadeUp 0.6s ease 0.1s both;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-title span {
+    display: block;
+    color: var(--amber);
+    text-shadow: 0 4px 0 rgba(0,0,0,0.4), 0 0 80px rgba(232,160,48,0.3);
+  }
+
+  .hero-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--moss-bright);
+    margin-top: 16px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(240,232,216,0.65);
+    max-width: 520px;
+    margin: 28px auto 0;
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(240,232,216,0.3);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: fadeUp 1s ease 1s both;
+  }
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(240,232,216,0.3), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 0.8; transform: scaleY(1.2); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(232,160,48,0.25);
+  }
+
+  .section-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(92,82,72,0.5), transparent);
+    margin: 0 40px;
+  }
+
+  /* ── THE CONCEPT ── */
+  .concept-block {
+    background: rgba(61,55,48,0.4);
+    border: 1px solid rgba(92,82,72,0.3);
+    border-left: 3px solid var(--moss-bright);
+    padding: 32px 36px;
+    border-radius: 2px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: rgba(240,232,216,0.85);
+    position: relative;
+    overflow: hidden;
+  }
+  .concept-block::before {
+    content: '❝';
+    position: absolute;
+    top: -10px;
+    right: 24px;
+    font-size: 6rem;
+    color: rgba(122,182,72,0.07);
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  /* ── PILLARS ── */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-top: 32px;
+    border: 1px solid rgba(92,82,72,0.3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .pillar {
+    background: rgba(42,37,32,0.6);
+    padding: 32px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .pillar:hover { background: rgba(61,55,48,0.8); }
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .pillar:nth-child(1)::before { background: var(--amber); }
+  .pillar:nth-child(2)::before { background: var(--moss-bright); }
+  .pillar:nth-child(3)::before { background: var(--danger); }
+  .pillar:nth-child(4)::before { background: #5a9fd4; }
+
+  .pillar-icon { font-size: 2rem; margin-bottom: 12px; }
+  .pillar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .pillar-desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: rgba(240,232,216,0.55);
+  }
+
+  /* ── GOALS ── */
+  .goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .goal-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    background: rgba(42,37,32,0.5);
+    border: 1px solid rgba(92,82,72,0.25);
+    border-radius: 2px;
+    transition: border-color 0.3s;
+  }
+  .goal-item:hover { border-color: rgba(122,182,72,0.4); }
+
+  .goal-num {
+    font-family: 'Black Ops One', cursive;
+    font-size: 1.8rem;
+    color: rgba(232,160,48,0.2);
+    line-height: 1;
+    min-width: 36px;
+  }
+  .goal-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: rgba(240,232,216,0.7);
+  }
+  .goal-text strong {
+    display: block;
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  /* ── END PRODUCT ── */
+  .deliverables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .deliverable-card {
+    background: rgba(42,37,32,0.6);
+    border: 1px solid rgba(92,82,72,0.3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .deliverable-header {
+    padding: 14px 20px;
+    background: rgba(61,55,48,0.5);
+    border-bottom: 1px solid rgba(92,82,72,0.3);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+  .deliverable-body {
+    padding: 20px;
+  }
+  .deliverable-body ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .deliverable-body li {
+    font-size: 0.9rem;
+    color: rgba(240,232,216,0.7);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .deliverable-body li::before {
+    content: '→';
+    color: var(--moss-bright);
+    font-size: 0.8rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── SCHEDULE STRIP ── */
+  .schedule-strip {
+    background: rgba(30,26,20,0.8);
+    border-top: 1px solid rgba(92,82,72,0.3);
+    border-bottom: 1px solid rgba(92,82,72,0.3);
+    padding: 60px 40px;
+  }
+
+  .schedule-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 32px;
+  }
+
+  .timeline-day {
+    background: rgba(42,37,32,0.6);
+    padding: 28px 24px;
+    position: relative;
+  }
+  .timeline-day::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .timeline-day:nth-child(1)::before { background: linear-gradient(90deg, var(--stone-light), var(--amber)); }
+  .timeline-day:nth-child(2)::before { background: linear-gradient(90deg, var(--amber), var(--moss-bright)); }
+  .timeline-day:nth-child(3)::before { background: linear-gradient(90deg, var(--moss-bright), #5a9fd4); }
+
+  .day-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .day-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 1.4rem;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+  .day-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .day-items li {
+    font-size: 0.85rem;
+    color: rgba(240,232,216,0.6);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .day-items li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--moss-bright);
+    font-size: 0.7rem;
+  }
+
+  .milestone {
+    margin-top: 20px;
+    padding: 12px 14px;
+    background: rgba(122,182,72,0.08);
+    border: 1px solid rgba(122,182,72,0.2);
+    border-radius: 2px;
+    font-size: 0.8rem;
+    color: var(--moss-bright);
+    font-weight: 500;
+  }
+  .milestone::before { content: '🎯 '; }
+
+  /* ── TEAM ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 32px;
+  }
+
+  .team-card {
+    background: rgba(42,37,32,0.6);
+    padding: 28px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .team-card:hover { background: rgba(61,55,48,0.8); }
+
+  .team-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    border: 2px solid rgba(92,82,72,0.4);
+  }
+  .team-card:nth-child(1) .team-avatar { background: rgba(232,160,48,0.15); border-color: rgba(232,160,48,0.4); }
+  .team-card:nth-child(2) .team-avatar { background: rgba(122,182,72,0.15); border-color: rgba(122,182,72,0.4); }
+  .team-card:nth-child(3) .team-avatar { background: rgba(90,159,212,0.15); border-color: rgba(90,159,212,0.4); }
+  .team-card:nth-child(4) .team-avatar { background: rgba(201,74,42,0.15); border-color: rgba(201,74,42,0.4); }
+
+  .team-role {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .team-owns {
+    font-size: 0.78rem;
+    color: rgba(240,232,216,0.45);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER CTA ── */
+  .footer-cta {
+    text-align: center;
+    padding: 80px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .footer-cta::before {
+    content: 'BOULDER BOUND';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Black Ops One', cursive;
+    font-size: clamp(4rem, 12vw, 9rem);
+    color: rgba(255,255,255,0.02);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -0.02em;
+  }
+
+  .cta-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: var(--white);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .cta-sub {
+    font-size: 1rem;
+    color: rgba(240,232,216,0.5);
+    max-width: 480px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+    position: relative;
+  }
+  .cta-badges {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .badge {
+    padding: 10px 22px;
+    border-radius: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .badge-primary {
+    background: var(--moss-bright);
+    color: #1a1a10;
+  }
+  .badge-secondary {
+    background: transparent;
+    border: 1px solid rgba(92,82,72,0.5);
+    color: rgba(240,232,216,0.6);
+  }
+
+  @media (max-width: 700px) {
+    .goals-grid, .deliverables, .timeline, .team-grid { grid-template-columns: 1fr; }
+    .pillars { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="boulder-deco b1"></div>
+  <div class="boulder-deco b2"></div>
+  <div class="boulder-deco b3"></div>
+  <div class="crack"></div>
+
+  <div class="hero-content">
+    <div class="game-jam-badge">🎮 Game Bash 2025 — Team Project Brief</div>
+    <h1 class="hero-title">
+      Boulder
+      <span>Bound</span>
+    </h1>
+    <p class="hero-tagline">Four players. One rock. No excuses.</p>
+    <p class="hero-sub">A cooperative physics-based game built in one weekend where four players must work together — and argue constantly — to push a boulder to the goal.</p>
+  </div>
+
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THE CONCEPT -->
+<section class="section">
+  <div class="section-label">The Concept</div>
+  <h2 class="section-title">What Are We Building?</h2>
+  <div class="concept-block">
+    Boulder Bound is a 4-player cooperative physics game. Players share a single goal: push a massive boulder from the start of a level to the finish zone. There's no shooting, no inventory, no complex systems — just physics, communication, and controlled chaos. One player pushing the wrong side undoes everyone else's work. Success requires coordination; failure is always hilarious.
+  </div>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-icon">🪨</div>
+      <div class="pillar-title">Physics-First</div>
+      <div class="pillar-desc">The boulder is the game. All fun emerges from how it moves, resists, and reacts to players.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🤝</div>
+      <div class="pillar-title">Cooperative</div>
+      <div class="pillar-desc">All 4 players are on the same team. No competitive mechanics — just shared success and shared failure.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🌐</div>
+      <div class="pillar-title">Multiplayer</div>
+      <div class="pillar-desc">LAN-based sessions via Unreal's Online Subsystem. Host, find, and join sessions in seconds.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">📦</div>
+      <div class="pillar-title">Shippable</div>
+      <div class="pillar-desc">Scoped to ship. One polished level, a clean UI loop, and a packaged Windows build by Sunday.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GOALS -->
+<section class="section">
+  <div class="section-label">Project Goals</div>
+  <h2 class="section-title">What We're Aiming For</h2>
+  <div class="goals-grid">
+    <div class="goal-item">
+      <div class="goal-num">01</div>
+      <div class="goal-text">
+        <strong>Ship a complete game loop</strong>
+        Join session → play level → win screen → play again. The full loop, working end-to-end by Sunday.
+      </div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-num">02</div>
+      <div class="goal-text">
+        <strong>Working LAN multiplayer</strong>
+        All 4 devs on the same session simultaneously. Replication solid enough that the boulder is in sync for everyone.
+      </div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-num">03</div>
+      <div class="goal-text">
+        <strong>Fun in the first 60 seconds</strong>
+        A first-time player picks it up, joins a session, and immediately understands what to do — and laughs.
+      </div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-num">04</div>
+      <div class="goal-text">
+        <strong>Everyone ships something</strong>
+        Every dev has clear ownership. Everyone can point to something in the final build and say "I made that."
+      </div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-num">05</div>
+      <div class="goal-text">
+        <strong>Packaged & playable build</strong>
+        A Windows .exe someone could hand to a friend. No editor required to play.
+      </div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-num">06</div>
+      <div class="goal-text">
+        <strong>Steam-ready foundation</strong>
+        Clean enough to list on Steam as a prototype. Proper title screen, credits, and a capsule image.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- END PRODUCT -->
+<section class="section">
+  <div class="section-label">End Product</div>
+  <h2 class="section-title">What We're Delivering</h2>
+  <div class="deliverables">
+    <div class="deliverable-card">
+      <div class="deliverable-header">🎮 Gameplay</div>
+      <div class="deliverable-body">
+        <ul>
+          <li>One fully playable physics-based level with obstacles</li>
+          <li>Boulder that responds to player pushes cooperatively</li>
+          <li>Goal zone with win condition and score/timer</li>
+          <li>Hazards: pits, ramps, bumpers, at least one moving obstacle</li>
+          <li>Player respawn on falling off the map</li>
+        </ul>
+      </div>
+    </div>
+    <div class="deliverable-card">
+      <div class="deliverable-header">🌐 Multiplayer</div>
+      <div class="deliverable-body">
+        <ul>
+          <li>LAN session hosting and joining from main menu</li>
+          <li>Up to 4 players simultaneously</li>
+          <li>Server-authoritative physics replication on the boulder</li>
+          <li>Lobby / ready-up screen before match starts</li>
+          <li>Player color differentiation (tell each other apart)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="deliverable-card">
+      <div class="deliverable-header">🎨 Presentation</div>
+      <div class="deliverable-body">
+        <ul>
+          <li>Styled main menu with Boulder Bound branding</li>
+          <li>In-game HUD (player count, progress to goal)</li>
+          <li>Win screen with replay option</li>
+          <li>Background music + SFX (roll, impact, win)</li>
+          <li>Credits screen</li>
+        </ul>
+      </div>
+    </div>
+    <div class="deliverable-card">
+      <div class="deliverable-header">📦 Build & Distribution</div>
+      <div class="deliverable-body">
+        <ul>
+          <li>Packaged Windows 64-bit build</li>
+          <li>Tested on at least 2 machines before shipping</li>
+          <li>itch.io upload as primary distribution</li>
+          <li>Steam page assets ready (capsule art, description)</li>
+          <li>Basic settings menu (audio volume)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCHEDULE -->
+<div class="schedule-strip">
+  <div class="schedule-inner">
+    <div class="section-label">Weekend Schedule</div>
+    <h2 class="section-title">Three Days to Ship</h2>
+    <div class="timeline">
+      <div class="timeline-day">
+        <div class="day-label">Day One</div>
+        <div class="day-title">Friday Night</div>
+        <ul class="day-items">
+          <li>Session setup & LAN hosting</li>
+          <li>Boulder replication working</li>
+          <li>Player character can push</li>
+          <li>Whitebox map blockout</li>
+          <li>Main menu wired to sessions</li>
+        </ul>
+        <div class="milestone">2 players shove a boulder around together</div>
+      </div>
+      <div class="timeline-day">
+        <div class="day-label">Day Two</div>
+        <div class="day-title">Saturday</div>
+        <ul class="day-items">
+          <li>Boulder feel tuned (weight, friction)</li>
+          <li>Real level with obstacles & goal</li>
+          <li>Win condition + win screen</li>
+          <li>Player visuals, camera, juice</li>
+          <li>Music & SFX integrated</li>
+          <li>Midday playtest + pivot session</li>
+        </ul>
+        <div class="milestone">Full playable loop from join → win</div>
+      </div>
+      <div class="timeline-day">
+        <div class="day-label">Day Three</div>
+        <div class="day-title">Sunday</div>
+        <ul class="day-items">
+          <li>Bug fixes from Saturday playtest</li>
+          <li>Lighting & visual polish pass</li>
+          <li>Particle FX & screen shake</li>
+          <li>Package Windows build</li>
+          <li>Upload to itch.io / Steam</li>
+          <li>2hr buffer for surprises</li>
+        </ul>
+        <div class="milestone">Packaged build live and shareable</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TEAM -->
+<section class="section">
+  <div class="section-label">The Team</div>
+  <h2 class="section-title">Who Owns What</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar">⚡</div>
+      <div class="team-role">Lead / Architect</div>
+      <div class="team-owns">Multiplayer & replication · Physics core · Game state · Session logic · Packaging</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">🗺️</div>
+      <div class="team-role">Environment</div>
+      <div class="team-owns">Map geometry · Obstacles & hazards · Lighting · Skybox & dressing · Goal zone</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">🧍</div>
+      <div class="team-role">Player & Feel</div>
+      <div class="team-owns">Character movement · Camera · Push animations · Death & respawn · Visual juice</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">🎨</div>
+      <div class="team-role">UI & Polish</div>
+      <div class="team-owns">HUD · Main menu · Win screen · Audio integration · Settings menu · Credits</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER CTA -->
+<section class="footer-cta">
+  <h2 class="cta-title">Let's Make Something Great</h2>
+  <p class="cta-sub">One weekend. Four developers. One unstoppable boulder. Scope is locked, roles are clear — time to build.</p>
+  <div class="cta-badges">
+    <span class="badge badge-primary">🪨 Boulder Bound — Game Bash 2025</span>
+    <span class="badge badge-secondary">Unreal Engine · LAN Multiplayer · Physics</span>
+  </div>
+</section>
+
+</body>
+</html>
